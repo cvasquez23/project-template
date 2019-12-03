@@ -11,5 +11,5 @@
 ### Console Commands
 * Start watching sass and start dev server.
 ```console
-* gulp watch
+gulp watch
 ``` 
