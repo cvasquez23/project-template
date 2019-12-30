@@ -2,19 +2,25 @@ const gulp = require('gulp');
 const sass = require('gulp-sass');
 const browserSync = require('browser-sync').create();
 const rename = require('gulp-rename');
+const autoprefixer = require('gulp-autoprefixer');
 
 // compile scss into css
 function style() {
   // where is the scss file
-  return gulp.src('./scss/**/*.scss')
-  // pass through scss compiler and minify
-  .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
-  //rename
-  .pipe(rename({ suffix: '.min'}))
-  // where to save
-  .pipe(gulp.dest('./'))
-  // stream changes to all browsers
-  .pipe(browserSync.stream());
+  return (
+    gulp
+      .src('./scss/**/*.scss')
+      // autoprefixer
+      .pipe(autoprefixer())
+      // pass through scss compiler and minify
+      .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
+      // rename
+      .pipe(rename({ suffix: '.min' }))
+      // where to save
+      .pipe(gulp.dest('./css'))
+      // stream changes to all browsers
+      .pipe(browserSync.stream())
+  );
 }
 
 function watch() {

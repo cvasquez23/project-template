@@ -12,6 +12,7 @@
 - [eslint-config-prettier](https://www.npmjs.com/package/eslint-config-prettier)
 - [eslint-plugin-node](https://www.npmjs.com/package/eslint-plugin-node)
 - [eslint-config-airbnb](https://www.npmjs.com/package/eslint-config-airbnb)
+- [gulp-autoprefixer](https://www.npmjs.com/package/gulp-autoprefixer)
 
 ## Notes
 
@@ -27,6 +28,7 @@ gulp watch
 
 - [Prettier Options](https://prettier.io/docs/en/options.html)
 - [ESLint Rules](https://eslint.org/docs/4.0.0/rules/)
+- [Autoprefixer Options](https://github.com/postcss/autoprefixer#options)
 
 ## Changelog
 
@@ -34,3 +36,7 @@ gulp watch
 
 1. Installed ESLint and Prettier
 2. Implemented Airbnb Style Guide
+
+### 12.30.19
+
+1. Installed Autoprefixer
