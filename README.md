@@ -13,6 +13,7 @@
 - [eslint-plugin-node](https://www.npmjs.com/package/eslint-plugin-node)
 - [eslint-config-airbnb](https://www.npmjs.com/package/eslint-config-airbnb)
 - [gulp-autoprefixer](https://www.npmjs.com/package/gulp-autoprefixer)
+- [php-plugin-prettier](https://www.npmjs.com/package/@prettier/plugin-php)
 
 ## Notes
 
@@ -40,3 +41,7 @@ gulp watch
 ### 12.30.19
 
 1. Installed Autoprefixer
+
+### 12.31.19
+
+1. Installed PHP Prettier Plugin
