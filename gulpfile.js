@@ -12,12 +12,10 @@ function style() {
       .src('./scss/**/*.scss')
       // autoprefixer
       .pipe(autoprefixer())
-      // pass through scss compiler and minify
-      .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-      // rename
-      .pipe(rename({ suffix: '.min' }))
+      // pass through scss compiler
+      .pipe(sass().on('error', sass.logError))
       // where to save
-      .pipe(gulp.dest('./css'))
+      .pipe(gulp.dest('.'))
       // stream changes to all browsers
       .pipe(browserSync.stream())
   );

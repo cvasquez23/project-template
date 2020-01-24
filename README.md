@@ -45,3 +45,9 @@ gulp watch
 ### 12.31.19
 
 1. Installed PHP Prettier Plugin
+
+### 01.24.20
+
+1. Edited gulpfile.js to be more compliant with WordPress (got rid of minify & changed location for .css output)
+2. Added the 7-1 structure to SCSS folder -- [7-1 Info](https://github.com/HugoGiraudel/sass-boilerplate)
+3. Added .gitignore
