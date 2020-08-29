@@ -5,8 +5,21 @@
  */
 "use strict";
 
+const newline = ["\n", "\r"];
+const valid_after_heredoc = ["\n", "\r", ";"];
+const valid_after_heredoc_73 = valid_after_heredoc.concat([
+  "\t",
+  " ",
+  ",",
+  "]",
+  ")",
+  "/",
+  "=",
+  "!",
+]);
+
 module.exports = {
-  T_CONSTANT_ENCAPSED_STRING: function() {
+  T_CONSTANT_ENCAPSED_STRING: function () {
     let ch;
     while (this.offset < this.size) {
       ch = this.input();
@@ -19,7 +32,7 @@ module.exports = {
     return this.tok.T_CONSTANT_ENCAPSED_STRING;
   },
   // check if matching a HEREDOC state
-  is_HEREDOC: function() {
+  is_HEREDOC: function () {
     const revert = this.offset;
     if (
       this._input[this.offset - 1] === "<" &&
@@ -60,12 +73,11 @@ module.exports = {
           // required ending quote
           if (tChar) this.offset++;
           // require newline
-          if (
-            this._input[this.offset - 1] === "\r" ||
-            this._input[this.offset - 1] === "\n"
-          ) {
+          if (newline.includes(this._input[this.offset - 1])) {
             // go go go
-            this.heredoc_label = yylabel;
+            this.heredoc_label.label = yylabel;
+            this.heredoc_label.length = yylabel.length;
+            this.heredoc_label.finished = false;
             yyoffset = this.offset - revert;
             this.offset = revert;
             this.consume(yyoffset);
@@ -74,6 +86,8 @@ module.exports = {
             } else {
               this.begin("ST_HEREDOC");
             }
+            // prematch to get the indentation information from end of doc
+            this.prematch_ENDOFDOC();
             return this.tok.T_START_HEREDOC;
           }
         }
@@ -82,7 +96,7 @@ module.exports = {
     this.offset = revert;
     return false;
   },
-  ST_DOUBLE_QUOTES: function() {
+  ST_DOUBLE_QUOTES: function () {
     let ch;
     while (this.offset < this.size) {
       ch = this.input();
@@ -126,25 +140,117 @@ module.exports = {
   },
 
   // check if its a DOC end sequence
-  isDOC_MATCH: function() {
+  isDOC_MATCH: function (offset, consumeLeadingSpaces) {
     // @fixme : check if out of text limits
+
+    // consumeLeadingSpaces is false happen DOC prematch END HEREDOC stage.
+
+    // Ensure current state is really after a new line break, not after a such as ${variables}
+    const prev_ch = this._input[offset - 2];
+    if (!newline.includes(prev_ch)) {
+      return false;
+    }
+
+    // skip leading spaces or tabs
+    let indentation_uses_spaces = false;
+    let indentation_uses_tabs = false;
+    // reset heredoc_label structure
+    let indentation = 0;
+    let leading_ch = this._input[offset - 1];
+
+    if (this.version >= 703) {
+      while (leading_ch === "\t" || leading_ch === " ") {
+        if (leading_ch === " ") {
+          indentation_uses_spaces = true;
+        } else if (leading_ch === "\t") {
+          indentation_uses_tabs = true;
+        }
+
+        leading_ch = this._input[offset + indentation];
+        indentation++;
+      }
+
+      // Move offset to skip leading whitespace
+      offset = offset + indentation;
+
+      // return out if there was only whitespace on this line
+      if (newline.includes(this._input[offset - 1])) {
+        return false;
+      }
+    }
+
     if (
       this._input.substring(
-        this.offset - 1,
-        this.offset - 1 + this.heredoc_label.length
-      ) === this.heredoc_label
+        offset - 1,
+        offset - 1 + this.heredoc_label.length
+      ) === this.heredoc_label.label
     ) {
-      const ch = this._input[this.offset - 1 + this.heredoc_label.length];
-      if (ch === "\n" || ch === "\r" || ch === ";") {
+      const ch = this._input[offset - 1 + this.heredoc_label.length];
+      if (
+        (this.version >= 703
+          ? valid_after_heredoc_73
+          : valid_after_heredoc
+        ).includes(ch)
+      ) {
+        if (consumeLeadingSpaces) {
+          this.consume(indentation);
+          // https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes
+          if (indentation_uses_spaces && indentation_uses_tabs) {
+            throw new Error(
+              "Parse error:  mixing spaces and tabs in ending marker at line " +
+                this.yylineno +
+                " (offset " +
+                this.offset +
+                ")"
+            );
+          }
+        } else {
+          // Called in prematch_ENDOFDOC
+          this.heredoc_label.indentation = indentation;
+          this.heredoc_label.indentation_uses_spaces = indentation_uses_spaces;
+          this.heredoc_label.first_encaps_node = true;
+        }
         return true;
       }
     }
+
     return false;
   },
 
-  matchST_NOWDOC: function() {
+  /**
+   * Prematch the end of HEREDOC/NOWDOC end tag to preset the
+   * context of this.heredoc_label
+   */
+  prematch_ENDOFDOC: function () {
+    // reset heredoc
+    this.heredoc_label.indentation_uses_spaces = false;
+    this.heredoc_label.indentation = 0;
+    this.heredoc_label.first_encaps_node = true;
+    let offset = this.offset + 1;
+
+    while (offset < this._input.length) {
+      // if match heredoc_label structrue will be set
+      if (this.isDOC_MATCH(offset, false)) {
+        return;
+      }
+
+      if (!newline.includes(this._input[offset - 1])) {
+        // skip one line
+        while (
+          !newline.includes(this._input[offset++]) &&
+          offset < this._input.length
+        ) {
+          // skip
+        }
+      }
+
+      offset++;
+    }
+  },
+
+  matchST_NOWDOC: function () {
     /** edge case : empty now doc **/
-    if (this.isDOC_MATCH()) {
+    if (this.isDOC_MATCH(this.offset, true)) {
       // @fixme : never reached (may be caused by quotes)
       this.consume(this.heredoc_label.length);
       this.popState();
@@ -153,9 +259,9 @@ module.exports = {
     /** SCANNING CONTENTS **/
     let ch = this._input[this.offset - 1];
     while (this.offset < this.size) {
-      if (ch === "\n" || ch === "\r") {
+      if (newline.includes(ch)) {
         ch = this.input();
-        if (this.isDOC_MATCH()) {
+        if (this.isDOC_MATCH(this.offset, true)) {
           this.unput(1).popState();
           this.appendToken(this.tok.T_END_HEREDOC, this.heredoc_label.length);
           return this.tok.T_ENCAPSED_AND_WHITESPACE;
@@ -168,10 +274,10 @@ module.exports = {
     return this.tok.T_ENCAPSED_AND_WHITESPACE;
   },
 
-  matchST_HEREDOC: function() {
+  matchST_HEREDOC: function () {
     /** edge case : empty here doc **/
     let ch = this.input();
-    if (this.isDOC_MATCH()) {
+    if (this.isDOC_MATCH(this.offset, true)) {
       this.consume(this.heredoc_label.length - 1);
       this.popState();
       return this.tok.T_END_HEREDOC;
@@ -180,14 +286,14 @@ module.exports = {
     while (this.offset < this.size) {
       if (ch === "\\") {
         ch = this.input(); // ignore next
-        if (ch !== "\n" && ch !== "\r") {
+        if (!newline.includes(ch)) {
           ch = this.input();
         }
       }
 
-      if (ch === "\n" || ch === "\r") {
+      if (newline.includes(ch)) {
         ch = this.input();
-        if (this.isDOC_MATCH()) {
+        if (this.isDOC_MATCH(this.offset, true)) {
           this.unput(1).popState();
           this.appendToken(this.tok.T_END_HEREDOC, this.heredoc_label.length);
           return this.tok.T_ENCAPSED_AND_WHITESPACE;
@@ -240,7 +346,7 @@ module.exports = {
     return this.tok.T_ENCAPSED_AND_WHITESPACE;
   },
 
-  consume_VARIABLE: function() {
+  consume_VARIABLE: function () {
     this.consume_LABEL();
     const ch = this.input();
     if (ch == "[") {
@@ -264,7 +370,7 @@ module.exports = {
     return this.tok.T_VARIABLE;
   },
   // HANDLES BACKQUOTES
-  matchST_BACKQUOTE: function() {
+  matchST_BACKQUOTE: function () {
     let ch = this.input();
     if (ch === "$") {
       ch = this.input();
@@ -339,7 +445,7 @@ module.exports = {
     return this.tok.T_ENCAPSED_AND_WHITESPACE;
   },
 
-  matchST_DOUBLE_QUOTES: function() {
+  matchST_DOUBLE_QUOTES: function () {
     let ch = this.input();
     if (ch === "$") {
       ch = this.input();
@@ -413,5 +519,5 @@ module.exports = {
       ch = this.input();
     }
     return this.tok.T_ENCAPSED_AND_WHITESPACE;
-  }
+  },
 };

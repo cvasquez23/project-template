@@ -6,7 +6,7 @@
 "use strict";
 
 module.exports = {
-  matchST_IN_SCRIPTING: function() {
+  matchST_IN_SCRIPTING: function () {
     let ch = this.input();
     switch (ch) {
       case " ":
@@ -69,13 +69,13 @@ module.exports = {
       default:
         if (ch === ".") {
           ch = this.input();
-          if (this.is_NUM()) {
+          if (this.is_NUM_START()) {
             return this.consume_NUM();
           } else {
             if (ch) this.unput(1);
           }
         }
-        if (this.is_NUM()) {
+        if (this.is_NUM_START()) {
           return this.consume_NUM();
         } else if (this.is_LABEL_START()) {
           return this.consume_LABEL().T_STRING();
@@ -94,7 +94,7 @@ module.exports = {
     );
   },
 
-  T_WHITESPACE: function() {
+  T_WHITESPACE: function () {
     while (this.offset < this.size) {
       const ch = this.input();
       if (ch === " " || ch === "\t" || ch === "\n" || ch === "\r") {
@@ -104,5 +104,5 @@ module.exports = {
       break;
     }
     return this.tok.T_WHITESPACE;
-  }
+  },
 };

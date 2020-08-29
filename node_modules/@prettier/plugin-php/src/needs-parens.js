@@ -27,7 +27,7 @@ function needsParens(path) {
       "include",
       "print",
       "return",
-      "echo"
+      "echo",
     ].includes(parent.kind)
   ) {
     return false;
@@ -64,6 +64,7 @@ function needsParens(path) {
     case "bin": {
       switch (parent.kind) {
         case "assign":
+        case "retif":
           return ["and", "xor", "or"].includes(node.type);
         case "silent":
         case "cast":

@@ -13,13 +13,12 @@ module.exports = {
    *  if ::= T_IF '(' expr ')' ':' ...
    * ```
    */
-  read_if: function() {
+  read_if: function () {
     const result = this.node("if");
+    const test = this.next().read_if_expr();
     let body = null;
     let alternate = null;
     let shortForm = false;
-    let test = null;
-    test = this.next().read_if_expr();
 
     if (this.token === ":") {
       shortForm = true;
@@ -52,7 +51,7 @@ module.exports = {
   /**
    * reads an if expression : '(' expr ')'
    */
-  read_if_expr: function() {
+  read_if_expr: function () {
     this.expect("(") && this.next();
     const result = this.read_expr();
     this.expect(")") && this.next();
@@ -61,15 +60,13 @@ module.exports = {
   /**
    * reads an elseif (expr): statements
    */
-  read_elseif_short: function() {
-    const result = this.node("if");
+  read_elseif_short: function () {
     let alternate = null;
-    let test = null;
-    let body = null;
-    const items = [];
-    test = this.next().read_if_expr();
+    const result = this.node("if");
+    const test = this.next().read_if_expr();
     if (this.expect(":")) this.next();
-    body = this.node("block");
+    const body = this.node("block");
+    const items = [];
     while (this.token != this.EOF && this.token !== this.tok.T_ENDIF) {
       if (this.token === this.tok.T_ELSEIF) {
         alternate = this.read_elseif_short();
@@ -80,19 +77,18 @@ module.exports = {
       }
       items.push(this.read_inner_statement());
     }
-    body = body(null, items);
-    return result(test, body, alternate, true);
+    return result(test, body(null, items), alternate, true);
   },
   /**
    *
    */
-  read_else_short: function() {
-    const body = this.node("block");
+  read_else_short: function () {
     if (this.next().expect(":")) this.next();
+    const body = this.node("block");
     const items = [];
     while (this.token != this.EOF && this.token !== this.tok.T_ENDIF) {
       items.push(this.read_inner_statement());
     }
     return body(null, items);
-  }
+  },
 };
