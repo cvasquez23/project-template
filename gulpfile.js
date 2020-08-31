@@ -23,7 +23,12 @@ function style() {
 
 function watch() {
   browserSync.init({
-    proxy: '', //place WAMP url here
+    //proxy: '', //place WAMP url here
+    
+    //If not using WAMP
+    server: {
+      baseDir: './'
+    }
   });
   gulp.watch('./scss/**/*.scss', style);
   gulp.watch('./**/*.html').on('change', browserSync.reload);
