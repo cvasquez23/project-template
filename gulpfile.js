@@ -3,6 +3,7 @@ const sass = require('gulp-sass');
 const browserSync = require('browser-sync').create();
 const rename = require('gulp-rename');
 const autoprefixer = require('gulp-autoprefixer');
+const purgecss = require('gulp-purgecss');
 
 // compile scss into css
 function style() {
@@ -35,6 +36,17 @@ function watch() {
   gulp.watch('./js/*.js').on('change', browserSync.reload);
   gulp.watch('./**/*.php').on('change', browserSync.reload);
 }
+
+gulp.task('purgecss', () => {
+  return gulp
+    .src('./*.css')
+    .pipe(
+      purgecss({
+        content: ['./**/*.html'],
+      })
+    )
+    .pipe(gulp.dest('.'));
+});
 
 exports.style = style;
 exports.watch = watch;

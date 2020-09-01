@@ -25,6 +25,12 @@
 gulp watch
 ```
 
+- Purge unused CSS
+
+```console
+gulp purgecss
+```
+
 ### Useful Links
 
 - [Prettier Options](https://prettier.io/docs/en/options.html)
