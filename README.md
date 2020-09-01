@@ -14,6 +14,11 @@
 - [eslint-config-airbnb](https://www.npmjs.com/package/eslint-config-airbnb)
 - [gulp-autoprefixer](https://www.npmjs.com/package/gulp-autoprefixer)
 - [php-plugin-prettier](https://www.npmjs.com/package/@prettier/plugin-php)
+- [purgecss](https://www.npmjs.com/package/gulp-purgecss)
+- [del](https://www.npmjs.com/package/del)
+- [run-sequence](https://www.npmjs.com/package/run-sequence)
+- [gulp-htmlmin](https://www.npmjs.com/package/gulp-htmlmin)
+- [gulp-uglify](https://www.npmjs.com/package/gulp-uglify)
 
 ## Notes
 
@@ -31,29 +36,26 @@ gulp watch
 gulp purgecss
 ```
 
+- Minify CSS
+
+```console
+gulp styles
+```
+
+- Minify JS
+
+```console
+gulp scripts
+```
+
+- Minify HTML
+
+```console
+gulp pages
+```
+
 ### Useful Links
 
 - [Prettier Options](https://prettier.io/docs/en/options.html)
 - [ESLint Rules](https://eslint.org/docs/4.0.0/rules/)
 - [Autoprefixer Options](https://github.com/postcss/autoprefixer#options)
-
-## Changelog
-
-### 12.03.19
-
-1. Installed ESLint and Prettier
-2. Implemented Airbnb Style Guide
-
-### 12.30.19
-
-1. Installed Autoprefixer
-
-### 12.31.19
-
-1. Installed PHP Prettier Plugin
-
-### 01.24.20
-
-1. Edited gulpfile.js to be more compliant with WordPress (got rid of minify & changed location for .css output)
-2. Added the 7-1 structure to SCSS folder -- [7-1 Info](https://github.com/HugoGiraudel/sass-boilerplate)
-3. Added .gitignore
