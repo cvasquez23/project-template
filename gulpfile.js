@@ -52,7 +52,7 @@ gulp.task('purgecss', () => {
         content: ['./**/*.html'],
       })
     )
-    .pipe(gulp.dest('./css'));
+    .pipe(gulp.dest('./'));
 });
 
 // minify css
@@ -102,6 +102,8 @@ gulp.task('pages', function () {
 gulp.task('minify', function () {
   runSequence('styles', 'scripts', 'pages');
 });
+
+gulp.task('clean', () => del(['./']));
 
 exports.style = style;
 exports.watch = watch;
