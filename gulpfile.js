@@ -49,10 +49,10 @@ gulp.task('purgecss', () => {
     .src('./css/*.css')
     .pipe(
       purgecss({
-        content: ['./**/*.html'],
+        content: ['./*.html'],
       })
     )
-    .pipe(gulp.dest('./'));
+    .pipe(gulp.dest('./css/'));
 });
 
 // minify css
@@ -66,7 +66,6 @@ gulp.task('styles', () => {
 
       // pass through scss compiler AND minify
       .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-      .pipe(rename({ suffix: '.min' }))
 
       // where to save
       .pipe(gulp.dest('./css'))
