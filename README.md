@@ -14,6 +14,11 @@
 - [eslint-config-airbnb](https://www.npmjs.com/package/eslint-config-airbnb)
 - [gulp-autoprefixer](https://www.npmjs.com/package/gulp-autoprefixer)
 - [php-plugin-prettier](https://www.npmjs.com/package/@prettier/plugin-php)
+- [purgecss](https://www.npmjs.com/package/gulp-purgecss)
+- [del](https://www.npmjs.com/package/del)
+- [run-sequence](https://www.npmjs.com/package/run-sequence)
+- [gulp-htmlmin](https://www.npmjs.com/package/gulp-htmlmin)
+- [gulp-uglify](https://www.npmjs.com/package/gulp-uglify)
 
 ## Notes
 
@@ -29,6 +34,24 @@ gulp watch
 
 ```console
 gulp purgecss
+```
+
+- Minify CSS
+
+```console
+gulp styles
+```
+
+- Minify JS
+
+```console
+gulp scripts
+```
+
+- Minify HTML
+
+```console
+gulp pages
 ```
 
 ### Useful Links
