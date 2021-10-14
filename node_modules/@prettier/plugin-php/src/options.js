@@ -7,7 +7,7 @@ module.exports = {
     since: "0.13.0",
     category: CATEGORY_PHP,
     type: "choice",
-    default: "5.4",
+    default: "7.0",
     description: "Minimum target PHP version.",
     choices: [
       { value: "5.0" },
@@ -22,6 +22,7 @@ module.exports = {
       { value: "7.2" },
       { value: "7.3" },
       { value: "7.4" },
+      { value: "8.0" },
     ],
   },
   trailingCommaPHP: {
